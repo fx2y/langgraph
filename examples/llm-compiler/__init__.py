@@ -1,3 +1,9 @@
+"""
+Initialize the LLMCompiler package.
+
+This module imports main functions from the created modules and provides package metadata.
+"""
+
 from .planner import create_planner, stream_plan
 from .scheduler import schedule_tasks
 from .joiner import create_joiner
