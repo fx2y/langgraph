@@ -254,7 +254,6 @@ def generate(state):
     question = messages[0].content
     last_message = messages[-1]
 
-    question = messages[0].content
     docs = last_message.content
 
     # Prompt

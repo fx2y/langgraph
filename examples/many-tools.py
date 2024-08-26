@@ -189,9 +189,9 @@ def select_tools(state: State):
             "set more_information_needed False and populate a blank string for the query."
         )
         input_messages = [system] + state["messages"]
-        response = llm.bind_tools(
-            [QueryForTools], tool_choice=True
-        ).invoke(input_messages)
+        response = llm.bind_tools([QueryForTools], tool_choice=True).invoke(
+            input_messages
+        )
         query = response.tool_calls[0]["args"]["query"]
     tool_documents = vector_store.similarity_search(query)
     if hack_remove_tool_condition:

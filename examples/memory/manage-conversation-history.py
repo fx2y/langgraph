@@ -176,8 +176,8 @@ def should_continue(state: MessagesState) -> Literal["action", "__end__"]:
 
 
 def filter_messages(messages: list):
-    # This is very simple helper function which only ever uses the last two messages
-    return messages[-2:]
+    # This is very simple helper function which only ever uses the last message
+    return messages[-1:]
 
 
 # Define the function that calls the model

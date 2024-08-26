@@ -96,6 +96,7 @@ def web_search(query: str) -> str:
         for d in web_results
     ]
 
+
 # Tool list
 tools = [retrieve_documents, web_search]
 
@@ -107,8 +108,10 @@ from langchain_core.runnables import Runnable, RunnableConfig
 from langgraph.graph.message import AnyMessage, add_messages
 from typing_extensions import TypedDict
 
+
 class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
+
 
 class Assistant:
     def __init__(self, runnable: Runnable):
@@ -220,6 +223,7 @@ display(Image(react_graph.get_graph(xray=True).draw_mermaid_png()))
 
 # %%
 import uuid
+
 
 def predict_react_agent_answer(example: dict):
     """Use this for answer evaluation"""

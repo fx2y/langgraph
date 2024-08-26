@@ -75,15 +75,18 @@ def weather_search(city: str):
     print("----")
     return "Sunny!"
 
-model = ChatAnthropic(model_name="claude-3-5-sonnet-20240620").bind_tools([weather_search])
+
+model = ChatAnthropic(model_name="claude-3-5-sonnet-20240620").bind_tools(
+    [weather_search]
+)
+
 
 class State(MessagesState):
     """Simple state."""
 
+
 def call_llm(state):
-    return {
-        "messages": [model.invoke(state['messages'])]
-    }
+    return {"messages": [model.invoke(state["messages"])]}
 
 
 def human_review_node(state):
@@ -93,28 +96,30 @@ def human_review_node(state):
 def run_tool(state):
     new_messages = []
     tools = {"weather_search": weather_search}
-    tool_calls = state['messages'][-1].tool_calls
+    tool_calls = state["messages"][-1].tool_calls
     for tool_call in tool_calls:
-        tool = tools[tool_call['name']]
-        result = tool.invoke(tool_call['args'])
-        new_messages.append({
-            "role": "tool",
-            "name": tool_call['name'],
-            "content": result,
-            "tool_call_id": tool_call['id']
-        })
+        tool = tools[tool_call["name"]]
+        result = tool.invoke(tool_call["args"])
+        new_messages.append(
+            {
+                "role": "tool",
+                "name": tool_call["name"],
+                "content": result,
+                "tool_call_id": tool_call["id"],
+            }
+        )
     return {"messages": new_messages}
 
 
 def route_after_llm(state) -> Literal[END, "human_review_node"]:
-    if len(state['messages'][-1].tool_calls) == 0:
+    if len(state["messages"][-1].tool_calls) == 0:
         return END
     else:
         return "human_review_node"
 
 
 def route_after_human(state) -> Literal["run_tool", "call_llm"]:
-    if isinstance(state['messages'][-1], AIMessage):
+    if isinstance(state["messages"][-1], AIMessage):
         return "run_tool"
     else:
         return "call_llm"
@@ -220,35 +225,35 @@ state = graph.get_state(thread)
 print("Current State:")
 print(state.values)
 print("\nCurrent Tool Call ID:")
-current_content = state.values['messages'][-1].content
-current_id = state.values['messages'][-1].id
-tool_call_id = state.values['messages'][-1].tool_calls[0]['id']
+current_content = state.values["messages"][-1].content
+current_id = state.values["messages"][-1].id
+tool_call_id = state.values["messages"][-1].tool_calls[0]["id"]
 print(tool_call_id)
 
 # We now need to construct a replacement tool call.
 # We will change the argument to be `San Francisco, USA`
 # Note that we could change any number of arguments or tool names - it just has to be a valid one
 new_message = {
-    "role": "assistant", 
+    "role": "assistant",
     "content": current_content,
     "tool_calls": [
         {
             "id": tool_call_id,
             "name": "weather_search",
-            "args": {"city": "San Francisco, USA"}
+            "args": {"city": "San Francisco, USA"},
         }
     ],
     # This is important - this needs to be the same as the message you replacing!
     # Otherwise, it will show up as a separate message
-    "id": current_id
+    "id": current_id,
 }
 graph.update_state(
     # This is the config which represents this thread
-    thread, 
+    thread,
     # This is the updated value we want to push
-    {"messages": [new_message]}, 
+    {"messages": [new_message]},
     # We push this update acting as our human_review_node
-    as_node="human_review_node"
+    as_node="human_review_node",
 )
 
 # Let's now continue executing from here
@@ -293,26 +298,26 @@ state = graph.get_state(thread)
 print("Current State:")
 print(state.values)
 print("\nCurrent Tool Call ID:")
-tool_call_id = state.values['messages'][-1].tool_calls[0]['id']
+tool_call_id = state.values["messages"][-1].tool_calls[0]["id"]
 print(tool_call_id)
 
 # We now need to construct a replacement tool call.
 # We will change the argument to be `San Francisco, USA`
 # Note that we could change any number of arguments or tool names - it just has to be a valid one
 new_message = {
-    "role": "tool", 
+    "role": "tool",
     # This is our natural language feedback
     "content": "User requested changes: pass in the country as well",
     "name": "weather_search",
-    "tool_call_id": tool_call_id
+    "tool_call_id": tool_call_id,
 }
 graph.update_state(
     # This is the config which represents this thread
-    thread, 
+    thread,
     # This is the updated value we want to push
-    {"messages": [new_message]}, 
+    {"messages": [new_message]},
     # We push this update acting as our human_review_node
-    as_node="human_review_node"
+    as_node="human_review_node",
 )
 
 # Let's now continue executing from here

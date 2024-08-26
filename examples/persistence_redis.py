@@ -443,7 +443,9 @@ class AsyncRedisSaver(BaseCheckpointSaver):
 
     @classmethod
     @asynccontextmanager
-    async def from_conn_info(cls, *, host: str, port: int, db: int) -> AsyncIterator["AsyncRedisSaver"]:
+    async def from_conn_info(
+        cls, *, host: str, port: int, db: int
+    ) -> AsyncIterator["AsyncRedisSaver"]:
         conn = None
         try:
             conn = AsyncRedis(host=host, port=port, db=db)
@@ -687,10 +689,14 @@ checkpoint_tuples
 # ## Use async connection
 
 # %%
-async with AsyncRedisSaver.from_conn_info(host="localhost", port=6379, db=0) as checkpointer:
+async with AsyncRedisSaver.from_conn_info(
+    host="localhost", port=6379, db=0
+) as checkpointer:
     graph = create_react_agent(model, tools=tools, checkpointer=checkpointer)
     config = {"configurable": {"thread_id": "2"}}
-    res = await graph.ainvoke({"messages": [("human", "what's the weather in nyc")]}, config)
+    res = await graph.ainvoke(
+        {"messages": [("human", "what's the weather in nyc")]}, config
+    )
 
     latest_checkpoint = await checkpointer.aget(config)
     latest_checkpoint_tuple = await checkpointer.aget_tuple(config)

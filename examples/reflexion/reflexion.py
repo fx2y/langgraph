@@ -260,6 +260,7 @@ from typing_extensions import TypedDict
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
+
 MAX_ITERATIONS = 5
 builder = StateGraph(State)
 builder.add_node("draft", first_responder.respond)

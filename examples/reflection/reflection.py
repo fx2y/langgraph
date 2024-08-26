@@ -121,7 +121,7 @@ from typing_extensions import TypedDict
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
-    
+
 async def generation_node(state: Sequence[BaseMessage]):
     return await generate.ainvoke({"messages": state})
 

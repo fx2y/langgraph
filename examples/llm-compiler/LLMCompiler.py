@@ -375,7 +375,7 @@ def plan_and_schedule(state):
             "tasks": tasks,
         }
     )
-    return {"messages":[scheduled_tasks]}
+    return {"messages": [scheduled_tasks]}
 
 
 # %% [markdown]
@@ -448,7 +448,7 @@ def _parse_joiner_output(decision: JoinOutputs) -> List[BaseMessage]:
             )
         ]
     else:
-        return {"messages":response + [AIMessage(content=decision.action.response)]}
+        return {"messages": response + [AIMessage(content=decision.action.response)]}
 
 
 def select_recent_messages(state) -> dict:
@@ -483,8 +483,10 @@ from langgraph.graph import END, StateGraph, START
 from langgraph.graph.message import add_messages
 from typing import Annotated
 
+
 class State(TypedDict):
     messages: Annotated[list, add_messages]
+
 
 graph_builder = StateGraph(State)
 
@@ -522,7 +524,9 @@ chain = graph_builder.compile()
 # Let's ask a simple question of the agent.
 
 # %%
-for step in chain.stream({"messages":[HumanMessage(content="What's the GDP of New York?")]}):
+for step in chain.stream(
+    {"messages": [HumanMessage(content="What's the GDP of New York?")]}
+):
     print(step)
     print("---")
 

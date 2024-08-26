@@ -48,12 +48,12 @@ def generate_query(state: OverallState) -> QueryOutputState:
 # Node to retrieve documents
 def retrieve_documents(state: QueryOutputState) -> DocumentOutputState:
     # Replace this with real logic
-    return {"docs": [state['query']] * 2}
+    return {"docs": [state["query"]] * 2}
 
 
 # Node to generate answer
 def generate(state: GenerateInputState) -> OverallState:
-    return {"answer": "\n\n".join(state['docs'] + [state['question']])}
+    return {"answer": "\n\n".join(state["docs"] + [state["question"]])}
 
 
 graph = StateGraph(OverallState)

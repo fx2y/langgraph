@@ -177,7 +177,15 @@ def lookup_policy(query: str) -> str:
 #
 # Define the (`fetch_user_flight_information`) tool to let the agent see the current user's flight information.  Then define tools to search for flights and manage the passenger's bookings stored in the SQL database.
 #
-# We use `ensure_config` to pass in the `passenger_id` in via configurable parameters. The LLM never has to provide these explicitly, they are provided for a given invocation of the graph so that each user cannot access other passengers' booking information.
+# We the can [access the RunnableConfig](https://python.langchain.com/v0.2/docs/how_to/tool_configure/#inferring-by-parameter-type) for a given run to check the `passenger_id` of the user accessing this application. The LLM never has to provide these explicitly, they are provided for a given invocation of the graph so that each user cannot access other passengers' booking information.
+#
+# <div class="admonition warning">
+#     <p class="admonition-title">Compatibility</p>
+#     <p>
+#         This tutorial expects `langchain-core>=0.2.16` to use the injected RunnableConfig. Prior to that, you'd use `ensure_config` to collect the config from context.
+#     </p>
+# </div> 
+#
 
 # %%
 import sqlite3
@@ -185,18 +193,17 @@ from datetime import date, datetime
 from typing import Optional
 
 import pytz
-from langchain_core.runnables import ensure_config
+from langchain_core.runnables import RunnableConfig
 
 
 @tool
-def fetch_user_flight_information() -> list[dict]:
+def fetch_user_flight_information(config: RunnableConfig) -> list[dict]:
     """Fetch all tickets for the user along with corresponding flight information and seat assignments.
 
     Returns:
         A list of dictionaries where each dictionary contains the ticket details,
         associated flight details, and the seat assignments for each ticket belonging to the user.
     """
-    config = ensure_config()  # Fetch from the context
     configuration = config.get("configurable", {})
     passenger_id = configuration.get("passenger_id", None)
     if not passenger_id:
@@ -273,9 +280,10 @@ def search_flights(
 
 
 @tool
-def update_ticket_to_new_flight(ticket_no: str, new_flight_id: int) -> str:
+def update_ticket_to_new_flight(
+    ticket_no: str, new_flight_id: int, *, config: RunnableConfig
+) -> str:
     """Update the user's ticket to a new valid flight."""
-    config = ensure_config()
     configuration = config.get("configurable", {})
     passenger_id = configuration.get("passenger_id", None)
     if not passenger_id:
@@ -341,9 +349,8 @@ def update_ticket_to_new_flight(ticket_no: str, new_flight_id: int) -> str:
 
 
 @tool
-def cancel_ticket(ticket_no: str) -> str:
+def cancel_ticket(ticket_no: str, *, config: RunnableConfig) -> str:
     """Cancel the user's ticket and remove it from the database."""
-    config = ensure_config()
     configuration = config.get("configurable", {})
     passenger_id = configuration.get("passenger_id", None)
     if not passenger_id:

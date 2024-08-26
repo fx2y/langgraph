@@ -137,7 +137,7 @@ def chat_bot_node(state):
     # Call the chat bot
     chat_bot_response = my_chat_bot(messages)
     # Respond with an AI Message
-    return {"messages":[AIMessage(content=chat_bot_response["content"])]}
+    return {"messages": [AIMessage(content=chat_bot_response["content"])]}
 
 
 # %% [markdown]
@@ -161,7 +161,7 @@ def simulated_user_node(state):
     # Call the simulated user
     response = simulated_user.invoke({"messages": new_messages})
     # This response is an AI message - we need to flip this to be a human message
-    return {"messages":[HumanMessage(content=response.content)]}
+    return {"messages": [HumanMessage(content=response.content)]}
 
 
 # %% [markdown]
@@ -199,6 +199,7 @@ from typing_extensions import TypedDict
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
+
 
 graph_builder = StateGraph(State)
 graph_builder.add_node("user", simulated_user_node)

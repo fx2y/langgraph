@@ -195,6 +195,7 @@ def should_continue(state, config):
 
 tools = [get_context, cite_context_sources]
 
+
 # Define the function that calls the model
 def call_model(state, config):
     messages = state["messages"]

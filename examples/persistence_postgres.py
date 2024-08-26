@@ -65,15 +65,14 @@ model = ChatOpenAI(model_name="gpt-4o-mini", temperature=0)
 # Synchronous connections execute operations in a blocking manner, meaning each operation waits for completion before moving to the next one. The `DB_URI` is the database connection URI, with the protocol used for connecting to a PostgreSQL database, authentication, and host where database is running. The connection_kwargs dictionary defines additional parameters for the database connection.
 
 # %%
-DB_URI = "postgresql://postgres:postgres@localhost:5441/postgres?sslmode=disable"
+DB_URI = "postgresql://postgres:postgres@localhost:5442/postgres?sslmode=disable"
 
 # %%
 from psycopg.rows import dict_row
 
-connection_kwargs ={
+connection_kwargs = {
     "autocommit": True,
     "prepare_threshold": 0,
-    "row_factory": dict_row,
 }
 
 # %% [markdown]
@@ -91,7 +90,7 @@ pool = ConnectionPool(
     # Example configuration
     conninfo=DB_URI,
     max_size=20,
-    kwargs=connection_kwargs
+    kwargs=connection_kwargs,
 )
 
 with pool.connection() as conn:
@@ -170,7 +169,7 @@ async with AsyncConnectionPool(
     # Example configuration
     conninfo=DB_URI,
     max_size=20,
-    kwargs=connection_kwargs
+    kwargs=connection_kwargs,
 ) as pool, pool.connection() as conn:
     checkpointer = AsyncPostgresSaver(conn)
 

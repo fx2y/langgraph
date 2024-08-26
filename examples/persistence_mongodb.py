@@ -562,7 +562,6 @@ class AsyncMongoDBSaver(BaseCheckpointSaver):
         await self.db["checkpoint_writes"].bulk_write(operations)
 
 
-
 # %% [markdown]
 # ## Setup model and tools for the graph
 
@@ -592,7 +591,9 @@ model = ChatOpenAI(model_name="gpt-4o-mini", temperature=0)
 # ## Use sync connection
 
 # %%
-with MongoDBSaver.from_conn_info(host="localhost", port=27017, db_name="checkpoints") as checkpointer:
+with MongoDBSaver.from_conn_info(
+    host="localhost", port=27017, db_name="checkpoints"
+) as checkpointer:
     graph = create_react_agent(model, tools=tools, checkpointer=checkpointer)
     config = {"configurable": {"thread_id": "1"}}
     res = graph.invoke({"messages": [("human", "what's the weather in sf")]}, config)
@@ -614,10 +615,14 @@ checkpoint_tuples
 # ## Use async connection
 
 # %%
-async with AsyncMongoDBSaver.from_conn_info(host="localhost", port=27017, db_name="checkpoints") as checkpointer:
+async with AsyncMongoDBSaver.from_conn_info(
+    host="localhost", port=27017, db_name="checkpoints"
+) as checkpointer:
     graph = create_react_agent(model, tools=tools, checkpointer=checkpointer)
     config = {"configurable": {"thread_id": "2"}}
-    res = await graph.ainvoke({"messages": [("human", "what's the weather in nyc")]}, config)
+    res = await graph.ainvoke(
+        {"messages": [("human", "what's the weather in nyc")]}, config
+    )
 
     latest_checkpoint = await checkpointer.aget(config)
     latest_checkpoint_tuple = await checkpointer.aget_tuple(config)

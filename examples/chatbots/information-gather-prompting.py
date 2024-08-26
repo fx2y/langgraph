@@ -52,7 +52,12 @@ class PromptInstructions(BaseModel):
 llm = ChatOpenAI(temperature=0)
 llm_with_tool = llm.bind_tools([PromptInstructions])
 
-chain = get_messages_info | llm_with_tool
+
+def info_chain(state):
+    messages = get_messages_info(state["messages"])
+    response = llm_with_tool.invoke(messages)
+    return {"messages": [response]}
+
 
 # %% [markdown]
 # ## Generate Prompt
@@ -84,7 +89,11 @@ def get_prompt_messages(messages: list):
     return [SystemMessage(content=prompt_system.format(reqs=tool_call))] + other_msgs
 
 
-prompt_gen_chain = get_prompt_messages | llm
+def prompt_gen_chain(state):
+    messages = get_prompt_messages(state["messages"])
+    response = llm.invoke(messages)
+    return {"messages": [response]}
+
 
 # %% [markdown]
 # ## Define the state logic
@@ -101,7 +110,8 @@ from typing import Literal
 from langgraph.graph import END
 
 
-def get_state(messages) -> Literal["add_tool_message", "info", "__end__"]:
+def get_state(state) -> Literal["add_tool_message", "info", "__end__"]:
+    messages = state["messages"]
     if isinstance(messages[-1], AIMessage) and messages[-1].tool_calls:
         return "add_tool_message"
     elif not isinstance(messages[-1], HumanMessage):
@@ -122,20 +132,27 @@ from langgraph.graph.message import add_messages
 from typing import Annotated
 from typing_extensions import TypedDict
 
+
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
+
 memory = MemorySaver()
 workflow = StateGraph(State)
-workflow.add_node("info", chain)
+workflow.add_node("info", info_chain)
 workflow.add_node("prompt", prompt_gen_chain)
 
 
 @workflow.add_node
-def add_tool_message(state: list):
-    return ToolMessage(
-        content="Prompt generated!", tool_call_id=state[-1].tool_calls[0]["id"]
-    )
+def add_tool_message(state: State):
+    return {
+        "messages": [
+            ToolMessage(
+                content="Prompt generated!",
+                tool_call_id=state["messages"][-1].tool_calls[0]["id"],
+            )
+        ]
+    }
 
 
 workflow.add_conditional_edges("info", get_state)
@@ -165,9 +182,9 @@ while True:
         break
     output = None
     for output in graph.stream(
-        [HumanMessage(content=user)], config=config, stream_mode="updates"
+        {"messages": [HumanMessage(content=user)]}, config=config, stream_mode="updates"
     ):
-        last_message = next(iter(output.values()))
+        last_message = next(iter(output.values()))["messages"][-1]
         last_message.pretty_print()
 
     if output and "prompt" in output:

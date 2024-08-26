@@ -50,7 +50,9 @@ async def my_node(state: MessagesState, config: RunnableConfig):
     # It's completely optional, but useful if you have many functions with similar names
     gen = RunnableGenerator(my_generator).with_config(
         tags=["should_stream"],
-        callbacks=config.get("callbacks", [])  # <-- Propagate callbacks (Python <= 3.10)
+        callbacks=config.get(
+            "callbacks", []
+        ),  # <-- Propagate callbacks (Python <= 3.10)
     )
     async for message in gen.astream(state):
         messages.append(message)

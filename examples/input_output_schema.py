@@ -9,14 +9,18 @@
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict
 
+
 class InputState(TypedDict):
     question: str
+
 
 class OutputState(TypedDict):
     answer: str
 
+
 def answer_node(state: InputState):
     return {"answer": "bye"}
+
 
 graph = StateGraph(input=InputState, output=OutputState)
 graph.add_node(answer_node)

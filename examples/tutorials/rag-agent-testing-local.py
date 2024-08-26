@@ -110,9 +110,7 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.output_parsers import JsonOutputParser
 
 # JSON
-llm = ChatOllama(model="llama3.1", 
-                 format="json", 
-                 temperature=0)
+llm = ChatOllama(model="llama3.1", format="json", temperature=0)
 
 
 prompt = PromptTemplate(
@@ -132,6 +130,7 @@ retrieval_grader = prompt | llm | JsonOutputParser()
 from typing_extensions import TypedDict, List
 from IPython.display import Image, display
 from langgraph.graph import START, END, StateGraph
+
 
 class GraphState(TypedDict):
     """
@@ -297,21 +296,22 @@ custom_graph = workflow.compile()
 display(Image(custom_graph.get_graph(xray=True).draw_mermaid_png()))
 
 # %%
-import uuid 
+import uuid
+
 
 def predict_custom_agent_answer(example: dict):
-    
     config = {"configurable": {"thread_id": str(uuid.uuid4())}}
-    
+
     state_dict = custom_graph.invoke(
         {"question": example["input"], "steps": []}, config
     )
-    
+
     return {"response": state_dict["generation"], "steps": state_dict["steps"]}
 
+
 example = {"input": "What are the types of agent memory?"}
-#response = predict_custom_agent_answer(example)
-#response
+# response = predict_custom_agent_answer(example)
+# response
 
 # %% [markdown]
 # ## Evaluation
@@ -425,6 +425,7 @@ expected_trajectory_2 = [
     "grade_document_retrieval",
     "generate_answer",
 ]
+
 
 def check_trajectory_custom(root_run: Run, example: Example) -> dict:
     """
